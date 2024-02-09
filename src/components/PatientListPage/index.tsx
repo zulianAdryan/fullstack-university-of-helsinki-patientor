@@ -1,23 +1,30 @@
 import { useState } from "react";
-import { Box, Table, Button, TableHead, Typography, TableCell, TableRow, TableBody } from '@mui/material';
-import axios from 'axios';
-
-import { PatientFormValues, Patient } from "../../types";
+import {
+  Box,
+  Table,
+  Button,
+  TableHead,
+  Typography,
+  TableCell,
+  TableRow,
+  TableBody,
+} from "@mui/material";
+import axios from "axios";
+import { PatientFormValues, PatientEntry } from "../../types";
 import AddPatientModal from "../AddPatientModal";
-
 import HealthRatingBar from "../HealthRatingBar";
-
 import patientService from "../../services/patients";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
-  patients : Patient[]
-  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
+  patients: PatientEntry[];
+  setPatients: React.Dispatch<React.SetStateAction<PatientEntry[]>>;
 }
 
-const PatientListPage = ({ patients, setPatients } : Props ) => {
-
+const PatientListPage = ({ patients, setPatients }: Props) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
+  const navigate = useNavigate();
 
   const openModal = (): void => setModalOpen(true);
 
@@ -34,7 +41,10 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         if (e?.response?.data && typeof e?.response?.data === "string") {
-          const message = e.response.data.replace('Something went wrong. Error: ', '');
+          const message = e.response.data.replace(
+            "Something went wrong. Error: ",
+            ""
+          );
           console.error(message);
           setError(message);
         } else {
@@ -45,6 +55,10 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
         setError("Unknown error");
       }
     }
+  };
+
+  const handleClick = (id: string) => {
+    navigate(`/${id}`);
   };
 
   return (
@@ -64,9 +78,14 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.values(patients).map((patient: Patient) => (
+          {Object.values(patients).map((patient: PatientEntry) => (
             <TableRow key={patient.id}>
-              <TableCell>{patient.name}</TableCell>
+              <TableCell
+                style={{ cursor: "pointer" }}
+                onClick={() => handleClick(patient.id)}
+              >
+                {patient.name}
+              </TableCell>
               <TableCell>{patient.gender}</TableCell>
               <TableCell>{patient.occupation}</TableCell>
               <TableCell>
